@@ -1,2 +1,2 @@
 # poomMizan
- for studying webprograming
+ for studying
