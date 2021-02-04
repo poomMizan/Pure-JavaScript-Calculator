@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+	<!-- 
+		ทดลองใช้ความรู้ที่มี สร้าง Calculator ด้วย Pure JavaScript โดยไม่เปิดดู Youtube 	
+		อาจจะยังไม่สมบูรณ์ 100% แต่ในเบื้องต้นก็สามารถนำไปใช้งานได้จริง 
+	-->
+<html>
+<head>
+	<title>Calculator</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<style>
+		body{
+			background: black;
+			color: white;
+			font-weight: 777;
+			text-align: center;
+			font-style: oblique;
+		}
+		.col-3{
+			border: 1px solid darkgray;
+		}
+		.col-12{
+			text-align: right;
+		}
+		.col-3:hover, .col-6:hover{
+			background: darkgray;
+			cursor: pointer;
+		}
+		.col-3:active, .col-6:active{
+			background:orangered;;
+		}
+		.row{
+			height: 75px;
+		}
+		#input{
+			color: orangered
+		}
+	</style>
+</head>
+<body>
+  <div class="col-md-3 btn-lg">
+
+    <div class="row">
+      <div id="msg" class="col-12"></div>
+      <tex id="input" class="col-12"></tex>      
+		</div>		
+
+    <div class="row">
+      <div class="col-6">CLEAR</div>
+      <div class="col-3">DEL</div>
+      <div class="col-3">÷</div>    
+    </div>
+
+    <div class="row ">
+      <div class="col-3">7</div>
+      <div class="col-3">8</div>
+      <div class="col-3">9</div>
+      <div class="col-3">x</div>
+    </div>
+
+    <div class="row">
+      <div class="col-3">4</div>
+      <div class="col-3">5</div>
+      <div class="col-3">6</div>
+      <div class="col-3">-</div>
+    </div>
+
+    <div class="row">
+      <div class="col-3">1</div>
+      <div class="col-3">2</div>
+      <div class="col-3">3</div>
+      <div class="col-3">+</div>
+    </div>
+
+    <div class="row">
+      <div class="col-3">.</div>    
+      <div class="col-3">0</div>  
+      <div class="col-6 equal">=</div>
+		</div>
+	</div>
+<script>
+
+	let match_symbole = "";	
+		// เก็บค่าเครื่องหมายคณิตฯ เพื่อให้ทราบว่า user ต้องการที่จะ บวก ลบ คูณ หรือ หาร	
+	let current = 0;
+		// เก็บค่าตัวเลขชุดแรก เพื่อเก็บไว้คำนวนกับตัวเลขชุดที่สอง
+	function del() {
+		// ฟั่งชั่น เมื่อปุ่ม del หรือกดคีบอร์ด Backspace จะลบช่อง input ทีละตัว
+		input.innerHTML = input.innerHTML.slice(0, -1);
+	}
+	function clear() {// ฟังชั่นเมื่อกดปุ่ม CLEAR หรือกดคีย์บอร์ด ESC จะล้างค่าทั้งหมด
+		input.innerHTML = "";
+		msg.innerHTML = "";
+		current = 0;
+	}
+	function appendNumber(number_value) {
+		// ปุ่มเลข 0-9 หากไม่ติดเงี่อนไขใดๆ เลขจะไปปรากฎที่ช่อง input ทันที 
+		// หากช่อง input มีเลข 0 อยู่ตัวเดียว จะไม่สามารถใส่เลข 0-9 ต่อท้ายได้	
+		if (input.innerHTML === "0") return;
+		input.innerHTML += number_value;
+	}
+	function dot(dot) {
+		// หากช่อง input เป็นค่าว่าง จะไม่สามารถใส่ dot [.] ได้ 
+		// หากช่อง input มี dot [.] อยู่แล้ว จะไม่สามารถใส่ dot . เพิ่มอีกได้
+		if (input.innerHTML === "" || input.innerHTML.includes(".")) return;
+			input.innerHTML += dot;
+	}	
+	function calculate() {
+		// ฟั่งชั่นคำนวณ นำตัวเลขชุดแรก *current* มาคำนวนกับชุดที่สอง *second_number*
+
+		let second_sum = parseFloat(input.innerHTML)  *10;
+		// แก้ปัญหา Floating Point Arithmetic
+		
+		if (match_symbol === "+") return (current * 10 + second_sum) / 10;
+		if (match_symbol === "-") return (current * 10 - second_sum) / 10;		
+		if (match_symbol === "x") return (current * 10 * second_sum) / 100;
+	
+		// แก้ปัญหาเวลาหารแล้วเกิด Floating Point Arithmetic 
+		if (match_symbol === "÷") {
+			if (!isNaN(parseFloat(current)) || !isNaN(parseFloat(second_sum))) {
+				return (current * 10 / second_sum);
+			}
+			return (current * 10 / second_sum) / 100;
+		}		
+	}
+	function beforeCalculate(symbol) {
+		// ฟังชั่่น เก็บค่าเครื่องหมายคณิต + - x ÷ ใส่ในตัวแปร match_symbol
+		// และเก็บเลขชุดแรกใส่ตัวแปร current เพื่อรอไปคำนวนกับเลขชุดที่สอง
+
+		match_symbol = symbol;
+		msg.innerHTML = input.innerHTML + " " + symbol;
+		current = parseFloat(input.innerHTML);					
+		input.innerHTML = "";
+	}	
+	function displayCalculate() { 
+		// เมื่อคลิ๊กปุ่ม [=] หรือปุ่ม Enter บนคีย์บอร์ด     
+		// ถ้าไม่ติดเงื่อนไขใดๆ จะเรียกฟังชั่น calculate เพื่อคำนวณ
+
+		// ไม่สามารถกดปุ่ม = ได้ หากช่อง input และ msg ยังเป็นค่าว่าง
+		// ไม่สามารถกดปุ่ม = ได้ หากยังไม่มีตัวเลขชุดแรกสำหรับคำนวน
+		if ( 
+				(current === 0 && msg.innerHTML === "") || 
+				input.innerHTML === "" && (msg.innerHTML === "" || 
+				msg.innerHTML !== "")
+			 )  
+			 return;
+
+		// ถ้าช่อง input มีตัวเลขที่ลงท้ายด้วย dot [.]  เช่น 3.  0.  8.  9. 
+		// จะไม่สามารถกดปุ่ม [=] หรือ Enter ได้
+		if (input.innerHTML.charAt(input.innerHTML.length - 1) === "." ) return;
+
+		// เมื่อคำนวนไปแล้ว 1 รอบ จะปรากฎเครื่องหมาย = บนช่อง msg
+		// เพื่อป้องกันไม่ให้ user กดปุ่ม = หรือ Enter ซ้ำๆกันหลายรอบ	
+		if (msg.innerHTML.includes("=")) return;			
+		else {
+			// นำผลลัพท์ที่ได้ไปแสดงที่หน้า input
+			// พร้อมกับ reset ค่า current เป็น 0
+			// เพื่อเตรียมไว้รับค่าตัวเลขชุดต่อไป หาก user ต้องการคำนวณต่อ
+			current = calculate();			
+			msg.innerHTML += ` ${input.innerHTML} =`;		
+			
+			//หาก user ทำการหารด้วย 0
+			input.innerHTML = (isFinite(current)) ? current: "0";
+			current = 0;
+		}
+	}
+	function checkMatchSymbol(symbol) {
+		// ฟั่งชั่น เช็คเครื่องหมายคณิต + - x ÷ ที่รับเข้ามา
+		// หากไม่ติดเงื่อนไขใดๆ จะเรียกใช้ฟังชั่น beforeCalculate
+		
+		// หากทั่งช่อง input และ msg เป็นค่าว่าง จะกดปุ่มเครื่องหมายคณิต + - x ÷ ไม่ได้
+		if (input.innerHTML === "" && msg.innerHTML === "") return;
+		
+		// ถ้าช่อง input มีตัวเลขที่ลงท้ายด้วย dot [.]  เช่น 3.  0.  8.  9. 
+		// จะไม่สามารถกดเครื่องหมายทางคณิต + - x ÷ ได้
+		if (input.innerHTML.charAt(input.innerHTML.length - 1) === "." ) return;
+
+		// เมื่อ user กดปุ่ม = เพื่อคำนวนไปแล้ว 1 รอบ 
+		// ทั้งช่อง input และ msg จะมีข้อความค้างอยู่ **ติดเงื่อนไขบรรทัดที่ 187**
+		// สังเกตุว่าข่อง msg จะมี เครื่องหมาย = อยู่ด้วย
+		// จึงต้องใส่เงื่อนไขนี้ไว้ เพื่อให้โปรแกรมสามารถทำงานต่อไปได้
+		if (msg.innerHTML.includes("=")) beforeCalculate(symbol);
+
+		// หากทั่งช่อง input และ msg มีการใส่ค่าเอาไว้แล้ว
+		// จะไม่สามารถกด + - x ÷ ได้อีก
+		if (input.innerHTML !== "" && msg.innerHTML !== "") return;
+
+		// กรณี user กดปุ่มเครื่องหมายคณิต + - x ÷ ไปแล้ว 
+		// แล้วเกิดเปลี่ยนใจ อยากเปลี่ยนเครื่องหมาย
+		// เช่น กด 2 + แล้วอยากเปลี่ยนเป็น 2 ÷
+		if (input.innerHTML === "" && msg.innerHTML !== "") {
+
+			// ในช่อง msg ลบเครื่องหมายคณิต + - x ÷ ตัวเดิมออก แล้วแทรกตัวใหม่ลงไป					
+			msg.innerHTML = msg.innerHTML.slice(0, -1) + " " + symbol;
+			match_symbol = symbol;
+			// match_symbol รับค่าเครื่องหมายคณิต + - x ÷ ตัวใหม่
+		}
+		// หากกดปุ่มเครืองหมายคณิต + - x ÷ แล้วไม่ติดเงื่อนไขใดๆ
+		else beforeCalculate(symbol);
+	}
+	// รับค่าจากปุ่มบนคีย์บอร์ด
+	document.addEventListener('keyup', (event) => {	
+		key = event.key;
+		if (key === "Backspace") del(); // ปุ่มคีย์บอร์ด Backspace 
+		if (!isNaN(key)) 	appendNumber(key); // ปุ่มคียบอร์ดเลข 0-9
+		if (key === ".") dot(key); // ปุ่มคีย์บอร์ด Dot [.] 		
+
+		// ปุ่มคียบอร์ดเครื่องหมายคณิต + - * /
+		if ( key === "+" || key === "-" || key === "*"|| key === "/") {
+			// ปุ่มเครื่องหมายคูณและหารบนคีย์บอร์ด จะแตกต่างจากการคลิ๊กเมาส์
+			// จึงต้องปรับให้เหมือนกัน 			
+			if (key === "*") key = "x";
+			if (key === "/") key = "÷";
+			checkMatchSymbol(key);
+		}
+		if (key === "Escape") clear(); // ปุ่มคียบอร์ด ESC
+		if (key === "Enter") displayCalculate(); // ปุ่มคียบอร์ด Enter		
+	});
+
+	// รับค่าจากการคลิ๊กเมาส์ที่ element class="col-3"
+  document.querySelectorAll('.col-3').forEach( (btn) => {
+	
+    btn.addEventListener('click', () => {
+		let BTN = btn.innerHTML;		
+
+      if (BTN === "DEL") del();	// ปุ่มคลิ๊ก DEL				
+      if (!isNaN(BTN)) appendNumber(BTN);	// ปุ่มคลิ๊ก ตัวเลข 0 - 9						
+      if (BTN === ".") dot(BTN); // ปุ่มคลิ๊ก Dot [.]					
+			// ปุ่มคลิ๊กเครื่องหมายคณิต + - x ÷   
+			if ( BTN === "+" || BTN === "-" || BTN === "x"  || BTN === "÷") {
+				checkMatchSymbol(BTN);
+			}
+		});
+  });
+	// รับค่าจากการคลิ็กเม้าส์ที่ element class="col-6"
+  document.querySelectorAll('.col-6').forEach((btn6) => {
+    btn6.addEventListener('click', () => {
+			
+      if (btn6.innerHTML === "CLEAR") clear(); // ปุ่มคลิ๊ก CLEAR					
+			if ( btn6.innerHTML === "=") displayCalculate(); // ปุ่มคลิ๊ก [=] 
+		});
+	});
+</script>
+</body>
+</html>
